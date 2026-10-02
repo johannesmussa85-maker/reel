@@ -1,6 +1,6 @@
 // Vercel serverless function: forwards allowed requests to TMDB using YOUR secret token.
 // The token lives in the TMDB_TOKEN environment variable, never in the browser.
-const ALLOWED = /^\/(trending\/movie\/(day|week)|search\/movie|discover\/movie|genre\/movie\/list|movie\/(popular|top_rated|now_playing|upcoming)|movie\/\d+(\/videos)?)$/;
+const ALLOWED = /^\/(trending\/movie\/(day|week)|search\/movie|discover\/movie|genre\/movie\/list|movie\/(popular|top_rated|now_playing|upcoming)|movie\/\d+(\/videos)?|person\/\d+)$/;
 
 module.exports = async (req, res) => {
   try {

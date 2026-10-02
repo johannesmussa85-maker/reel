@@ -62,6 +62,20 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
 .err{background:var(--surface);border:1.5px solid var(--err);color:var(--err);border-radius:12px;padding:12px 14px;margin:0 0 16px}
 .more{text-align:center;margin:24px 0 0}
 .acts{display:flex;gap:8px;flex-wrap:wrap}
+.sec{font:800 17px var(--head);margin:18px 0 8px}
+.cast{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.cm{flex:none;width:76px;border:0;background:transparent;text-align:center;padding:0;font-size:12px;line-height:1.25}
+.cm .ph{width:64px;height:64px;border-radius:50%;margin:0 auto 6px;background:var(--line);overflow:hidden;display:grid;place-items:center;font:800 20px var(--head);color:var(--muted);border:2px solid transparent}
+.cm[aria-pressed="true"] .ph{border-color:var(--accent)}
+.cm .ph img{width:100%;height:100%;object-fit:cover}
+.cm b{display:block;font-weight:600}
+.cm span{color:var(--muted);display:block}
+.person{background:var(--bg);border-radius:12px;padding:12px 14px;margin-top:8px;font-size:14px}
+.person p{margin:6px 0}
+.prov{margin:4px 0;font-size:14px}
+.prov b{display:inline-block;min-width:54px}
+.pchip{display:inline-block;border:1.5px solid var(--line);border-radius:8px;padding:2px 9px;margin:2px 4px 2px 0;font-size:13px;font-weight:500}
+.tiny{font-size:12px;color:var(--muted);margin-top:8px}
 .lbl{font-weight:600;font-size:13px;color:var(--muted);margin:0 0 6px;letter-spacing:.02em}
 
 .scrim{position:fixed;inset:0;background:rgba(8,6,18,.6);z-index:20;display:none;align-items:center;justify-content:center;padding:16px}
@@ -120,6 +134,7 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
 
   var IMG="https://image.tmdb.org/t/p/w342";
   var st={tab:"discover",q:"",genre:0,feed:"trending",canInstall:false,genres:[],items:[],page:1,total:1,loading:false,err:"",list:{},user:null,email:"",authMsg:"",authErr:false,busy:false};
+  var REGION=((navigator.language||"en-US").split("-")[1]||"US").toUpperCase();
   var modalState=null, reqId=0, searchTimer=null;
 
   try{var s=localStorage.getItem("reel-list");if(s)st.list=JSON.parse(s)||{};}catch(e){}
@@ -273,12 +288,43 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
     drawModal();
     document.getElementById("scrim").classList.add("on");
     var id=m.id;
-    Promise.all([api("/movie/"+id),api("/movie/"+id+"/videos")]).then(function(r){
+    api("/movie/"+id,{append_to_response:"videos,credits,watch/providers"}).then(function(d){
       if(!modalState||modalState.m.id!==id)return;
-      var vids=(r[1].results||[]).filter(function(v){return v.site==="YouTube";});
+      var vids=((d.videos&&d.videos.results)||[]).filter(function(v){return v.site==="YouTube";});
       var best=vids.filter(function(v){return v.type==="Trailer"&&v.official;})[0]||vids.filter(function(v){return v.type==="Trailer";})[0]||vids.filter(function(v){return v.type==="Teaser";})[0];
-      modalState.d=r[0];modalState.trailer=best?best.key:null;drawModal();
+      modalState.d=d;modalState.trailer=best?best.key:null;drawModal();
     }).catch(function(){if(modalState&&modalState.m.id===id){modalState.trailer=null;modalState.failed=true;drawModal();}});
+  }
+  function castHtml(d){
+    var c=(d&&d.credits&&d.credits.cast)||[];
+    if(!c.length)return "";
+    c=c.slice(0,12);
+    var sel=modalState.person?modalState.person.id:0;
+    var h2='<p class="sec">Cast</p><div class="cast">'+c.map(function(p){
+      var ph=p.profile_path?'<img src="https://image.tmdb.org/t/p/w185'+esc(p.profile_path)+'" alt="" loading="lazy">':esc((p.name||"?").charAt(0));
+      return '<button class="cm" data-act="person" data-id="'+p.id+'" aria-pressed="'+(sel===p.id)+'" aria-label="'+esc(p.name)+' as '+esc(p.character||"")+'"><div class="ph">'+ph+'</div><b>'+esc(p.name)+'</b><span>'+esc(p.character||"")+'</span></button>';
+    }).join("")+'</div>';
+    var pr=modalState.person;
+    if(pr){
+      if(pr.loading)h2+='<div class="person muted">Loading</div>';
+      else if(pr.err)h2+='<div class="person muted">Could not load details.</div>';
+      else{
+        var bio=(pr.biography||"").trim();if(bio.length>650)bio=bio.slice(0,650).replace(/\s+\S*$/,"")+"...";
+        var meta=[];if(pr.birthday)meta.push("Born "+pr.birthday);if(pr.place_of_birth)meta.push(pr.place_of_birth);
+        h2+='<div class="person"><b>'+esc(pr.name)+'</b><div class="muted">'+esc(meta.join(" · "))+'</div><p>'+(bio?esc(bio):'No biography available.')+'</p><a href="https://www.themoviedb.org/person/'+pr.id+'" target="_blank" rel="noopener noreferrer">More on TMDB</a></div>';
+      }
+    }
+    return h2;
+  }
+  function provHtml(d){
+    var res=d&&d["watch/providers"]&&d["watch/providers"].results;
+    if(!res)return "";
+    var reg=res[REGION]?REGION:(res.US?"US":Object.keys(res)[0]);
+    if(!reg)return '<p class="sec">Where to watch</p><p class="muted" style="margin:0">No legal streaming options listed yet.</p><p class="tiny">Streaming data provided by JustWatch.</p>';
+    var r=res[reg],rows=[["flatrate","Stream"],["free","Free"],["ads","Free with ads"],["rent","Rent"],["buy","Buy"]],out="";
+    rows.forEach(function(k){var l=r[k[0]];if(l&&l.length)out+='<div class="prov"><b>'+k[1]+'</b> '+l.map(function(x){return '<span class="pchip">'+esc(x.provider_name)+'</span>';}).join("")+'</div>';});
+    if(!out)out='<p class="muted" style="margin:0">Not available to stream, rent or buy in '+esc(reg)+'.</p>';
+    return '<p class="sec">Where to watch'+(reg!==REGION?' (in '+esc(reg)+')':'')+'</p>'+out+(r.link?'<p class="tiny"><a href="'+esc(r.link)+'" target="_blank" rel="noopener noreferrer">See all options</a> · Streaming data provided by JustWatch.</p>':'<p class="tiny">Streaming data provided by JustWatch.</p>');
   }
   function drawModal(){
     var ms=modalState,m=ms.m,d=ms.d,l=st.list[m.id]||null;
@@ -295,7 +341,8 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
       (ms.pick?'<p class="pick">Tonight\'s pick'+(ms.pick==="watchlist"?' from your watchlist':'')+'</p>':'')+
       '<h2 id="mt">'+esc(m.title)+'</h2><span class="muted">'+esc(info.join(" · "))+'</span>'+
       '<p>'+(d?esc(d.overview||"No description available."):'<span class="muted">Loading details</span>')+'</p>'+
-      (d&&d.vote_average?'<p class="muted">TMDB rating: '+d.vote_average.toFixed(1)+' / 10</p>':'')+
+      (d&&d.vote_average?'<p class="muted">TMDB rating: <b>'+d.vote_average.toFixed(1)+' / 10</b>'+(d.vote_count?' ('+d.vote_count.toLocaleString()+' votes)':'')+'</p>':'')+
+      castHtml(d)+provHtml(d)+
       '<div class="row"><button class="btn'+(l&&l.status==="watchlist"?' on':'')+'" data-act="wl">'+(l&&l.status==="watchlist"?'On your watchlist':'Add to watchlist')+'</button>'+
       '<button class="btn'+(l&&l.status==="watched"?' on':'')+'" data-act="seen">'+(l&&l.status==="watched"?'Watched':'Mark as watched')+'</button></div>'+
       '<div class="row">'+trailer+'</div>'+
@@ -338,6 +385,16 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
     else if(a==="genre"){st.genre=+v;loadItems(true);}
     else if(a==="feed"){st.feed=v;loadItems(true);}
     else if(a==="install")install();
+    else if(a==="person"){
+      var pid=+b.getAttribute("data-id");
+      if(modalState.person&&modalState.person.id===pid){modalState.person=null;drawModal();return;}
+      var mid=modalState.m.id;
+      modalState.person={id:pid,loading:true};drawModal();
+      api("/person/"+pid).then(function(p){
+        if(!modalState||modalState.m.id!==mid||!modalState.person||modalState.person.id!==pid)return;
+        modalState.person={id:pid,name:p.name,biography:p.biography,birthday:p.birthday,place_of_birth:p.place_of_birth};drawModal();
+      }).catch(function(){if(modalState&&modalState.person&&modalState.person.id===pid){modalState.person={id:pid,err:true};drawModal();}});
+    }
     else if(a==="more"){st.page++;loadItems(false);}
     else if(a==="open"){
       var id=+b.getAttribute("data-id");
