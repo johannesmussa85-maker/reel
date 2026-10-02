@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reel – your movie list</title>
+<title>Reel</title>
+<meta name="theme-color" content="#4A55E8">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reel">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -54,6 +61,8 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
 .empty b{display:block;color:var(--ink);font:800 20px var(--head);margin-bottom:6px}
 .err{background:var(--surface);border:1.5px solid var(--err);color:var(--err);border-radius:12px;padding:12px 14px;margin:0 0 16px}
 .more{text-align:center;margin:24px 0 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.lbl{font-weight:600;font-size:13px;color:var(--muted);margin:0 0 6px;letter-spacing:.02em}
 
 .scrim{position:fixed;inset:0;background:rgba(8,6,18,.6);z-index:20;display:none;align-items:center;justify-content:center;padding:16px}
 .scrim.on{display:flex}
@@ -110,7 +119,7 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
   try{ if(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase){ sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY); } }catch(e){ sb=null; }
 
   var IMG="https://image.tmdb.org/t/p/w342";
-  var st={tab:"discover",q:"",genre:0,genres:[],items:[],page:1,total:1,loading:false,err:"",list:{},user:null,email:"",authMsg:"",authErr:false,busy:false};
+  var st={tab:"discover",q:"",genre:0,feed:"trending",canInstall:false,genres:[],items:[],page:1,total:1,loading:false,err:"",list:{},user:null,email:"",authMsg:"",authErr:false,busy:false};
   var modalState=null, reqId=0, searchTimer=null;
 
   try{var s=localStorage.getItem("reel-list");if(s)st.list=JSON.parse(s)||{};}catch(e){}
@@ -128,13 +137,21 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
   }
   function norm(m){return {id:m.id,title:m.title||"Untitled",poster:m.poster_path||"",year:m.release_date?+m.release_date.slice(0,4):0};}
 
+  var FEEDS={trending:["Trending","/trending/movie/week"],popular:["Popular","/movie/popular"],top:["Top rated","/movie/top_rated"],now:["In cinemas","/movie/now_playing"],upcoming:["Coming soon","/movie/upcoming"]};
+  function ymd(d){return d.toISOString().slice(0,10);}
+  var standalone=!!(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
   function loadItems(reset){
     if(reset){st.page=1;st.items=[];}
     st.loading=true;st.err="";render();
     var p,params={page:st.page,include_adult:"false"};
     if(st.q.trim()){p="/search/movie";params.query=st.q.trim();}
-    else if(st.genre){p="/discover/movie";params.with_genres=st.genre;params.sort_by="popularity.desc";}
-    else p="/trending/movie/week";
+    else if(st.genre){
+      p="/discover/movie";params.with_genres=st.genre;params.sort_by="popularity.desc";
+      if(st.feed==="top"){params.sort_by="vote_average.desc";params["vote_count.gte"]=500;}
+      else if(st.feed==="now"){var t=new Date(),f=new Date(t.getTime()-45*864e5);params["primary_release_date.gte"]=ymd(f);params["primary_release_date.lte"]=ymd(t);}
+      else if(st.feed==="upcoming"){params["primary_release_date.gte"]=ymd(new Date());}
+    }
+    else p=FEEDS[st.feed][1];
     var token=++reqId;
     api(p,params).then(function(d){
       if(token!==reqId)return;
@@ -192,13 +209,14 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
       '<div class="meta"><b>'+esc(m.title)+'</b><span>'+(m.year||"")+'</span>'+(l&&l.rating?'<div class="stars" aria-label="'+l.rating+' of 5 stars">'+stars(l.rating)+'</div>':'')+'</div></button>';
   }
   function head(title,sub){
-    return '<div class="top"><div><h1>'+title+'</h1><p class="sub">'+sub+'</p></div><button class="btn primary" data-act="pick">Pick a movie for me</button></div>';
+    return '<div class="top"><div><h1>'+title+'</h1><p class="sub">'+sub+'</p></div><div class="acts">'+(st.canInstall?'<button class="btn" data-act="install">Install Reel</button>':'')+'<button class="btn primary" data-act="pick">Pick a movie for me</button></div></div>';
   }
   function viewDiscover(){
     var h=head("Find a movie","Search or browse what people are watching this week.");
     h+='<div class="tools"><input type="search" id="q" placeholder="Search movies" value="'+esc(st.q)+'" aria-label="Search movies"></div>';
     if(!st.q.trim()){
-      h+='<div class="chips" role="group" aria-label="Genre"><button class="chip" data-act="genre" data-v="0" aria-pressed="'+(st.genre===0)+'">All</button>'+
+      h+='<p class="lbl">Browse</p><div class="chips" role="group" aria-label="Movie lists">'+Object.keys(FEEDS).map(function(k){return '<button class="chip" data-act="feed" data-v="'+k+'" aria-pressed="'+(st.feed===k)+'">'+FEEDS[k][0]+'</button>';}).join("")+'</div>';
+      h+='<p class="lbl">Genre</p><div class="chips" role="group" aria-label="Genre"><button class="chip" data-act="genre" data-v="0" aria-pressed="'+(st.genre===0)+'">All genres</button>'+
         st.genres.map(function(g){return '<button class="chip" data-act="genre" data-v="'+g.id+'" aria-pressed="'+(st.genre===g.id)+'">'+esc(g.name)+'</button>';}).join("")+'</div>';
     }
     if(st.err)h+='<div class="err" role="alert">'+esc(st.err)+'</div>';
@@ -241,6 +259,9 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
     nav();
     var keep=document.activeElement&&document.activeElement.id;
     var h=st.tab==="account"?viewAccount():st.tab==="discover"?viewDiscover():viewList(st.tab);
+    if(st.tab==="account"&&!standalone){
+      h+='<div class="notice" style="margin-top:24px"><b>Install Reel</b><p class="muted" style="margin:6px 0 10px">Add Reel to your phone or computer like a normal app, with its own icon and no link to type.</p>'+(st.canInstall?'<button class="btn primary" data-act="install">Install Reel</button>':'<p class="muted" style="margin:0">In Chrome, open the menu (three dots) and choose Install app or Add to Home screen.</p>')+'</div>';
+    }
     h+='<p class="note">This product uses the TMDB API but is not endorsed or certified by TMDB. Movie data and images are provided by TMDB.</p>';
     document.getElementById("main").innerHTML=h;
     if(keep==="q"||keep==="acc-email"){var el=document.getElementById(keep);if(el){el.focus();try{var n=el.value.length;el.setSelectionRange(n,n);}catch(e){}}}
@@ -315,6 +336,8 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
     var a=b.getAttribute("data-act"),v=b.getAttribute("data-v");
     if(a==="tab"){st.tab=v;render();window.scrollTo(0,0);if(v==="discover"&&!st.items.length&&!st.loading)loadItems(true);}
     else if(a==="genre"){st.genre=+v;loadItems(true);}
+    else if(a==="feed"){st.feed=v;loadItems(true);}
+    else if(a==="install")install();
     else if(a==="more"){st.page++;loadItems(false);}
     else if(a==="open"){
       var id=+b.getAttribute("data-id");
@@ -338,6 +361,16 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0
     if(e.key==="Escape"&&modalState)closeModal();
     if(e.key==="Enter"&&(e.target.id==="acc-pass"||e.target.id==="acc-email")){e.preventDefault();auth("signin");}
   });
+
+  var deferred=null;
+  function install(){
+    if(!deferred){toast("In Chrome, open the menu and choose Install app");return;}
+    deferred.prompt();
+    deferred.userChoice.then(function(){deferred=null;st.canInstall=false;render();});
+  }
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;if(!standalone){st.canInstall=true;render();}});
+  window.addEventListener("appinstalled",function(){deferred=null;st.canInstall=false;render();toast("Reel installed");});
+  if("serviceWorker" in navigator){window.addEventListener("load",function(){try{navigator.serviceWorker.register("sw.js");}catch(e){}});}
 
   render();
   api("/genre/movie/list").then(function(d){st.genres=d.genres||[];render();}).catch(function(){});
