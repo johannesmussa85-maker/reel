@@ -1,438 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reel</title>
-<meta name="theme-color" content="#4A55E8">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Reel">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);
-  --bg:#F6F4FA;--surface:#FFFFFF;--ink:#1A1530;--muted:#675F82;--line:#DDD8EA;--accent:#4A55E8;--accent-ink:#FFFFFF;--star:#E39A00;--err:#B3261E;
-  --head:'Fraunces',Georgia,serif;--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#120F20;--surface:#1D1832;--ink:#F0EDFA;--muted:#A39CC0;--line:#2F2850;--accent:#8C96FF;--accent-ink:#120F20;--star:#FFC247;--err:#FF8A80}}
-:root[data-theme="dark"]{--bg:#120F20;--surface:#1D1832;--ink:#F0EDFA;--muted:#A39CC0;--line:#2F2850;--accent:#8C96FF;--accent-ink:#120F20;--star:#FFC247;--err:#FF8A80}
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--body);min-height:100vh}
-button,input,select{font:inherit;color:inherit}button{cursor:pointer}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-a{color:var(--accent)}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CINEMAX ULTRA - TMDB & Direct Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg-dark: #090d16;
+            --card-bg: rgba(23, 32, 51, 0.85);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+        }
 
-.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
-aside{position:sticky;top:0;height:100vh;padding:28px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
-.logo{font:800 30px var(--head);letter-spacing:-.02em;margin:0 0 18px 10px}
-.nb{border:0;background:transparent;text-align:left;padding:11px 14px;border-radius:10px;font-weight:600;color:var(--muted);display:flex;justify-content:space-between;align-items:center;min-height:44px}
-.nb[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:inset 3px 0 0 var(--accent)}
-.cnt{font-size:13px;color:var(--muted);font-weight:500}
-main{padding:28px clamp(16px,3vw,40px) 40px;min-width:0}
-.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{font:800 clamp(28px,4vw,40px)/1.05 var(--head);letter-spacing:-.02em;margin:0 0 4px}
-.sub{color:var(--muted);margin:0 0 18px}
-.tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.tools input[type=search]{flex:1 1 220px;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;min-height:46px}
-.chips{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 18px;padding:2px 16px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:500;font-size:14px;min-height:36px}
-.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn{border:1.5px solid var(--line);background:transparent;border-radius:12px;padding:10px 16px;font-weight:600;min-height:44px;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
-.btn.on,.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn[disabled]{opacity:.55;cursor:default}
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
-.card{background:transparent;border:0;padding:0;text-align:left;display:block;width:100%}
-.poster{aspect-ratio:2/3;border-radius:12px;position:relative;overflow:hidden;color:#fff;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--line)}
-.poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.poster .tt{font:800 19px/1.1 var(--head);position:relative}
-.badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;font-size:12px;font-weight:600;padding:3px 8px;z-index:1}
-.meta{padding:8px 2px 0;font-size:14px}
-.meta b{display:block;font-weight:600}
-.meta span{color:var(--muted)}
-.stars{color:var(--star);letter-spacing:1px}
-.empty{padding:50px 10px;text-align:center;color:var(--muted)}
-.empty b{display:block;color:var(--ink);font:800 20px var(--head);margin-bottom:6px}
-.err{background:var(--surface);border:1.5px solid var(--err);color:var(--err);border-radius:12px;padding:12px 14px;margin:0 0 16px}
-.more{text-align:center;margin:24px 0 0}
-.acts{display:flex;gap:8px;flex-wrap:wrap}
-.sec{font:800 17px var(--head);margin:18px 0 8px}
-.cast{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
-.cm{flex:none;width:76px;border:0;background:transparent;text-align:center;padding:0;font-size:12px;line-height:1.25}
-.cm .ph{width:64px;height:64px;border-radius:50%;margin:0 auto 6px;background:var(--line);overflow:hidden;display:grid;place-items:center;font:800 20px var(--head);color:var(--muted);border:2px solid transparent}
-.cm[aria-pressed="true"] .ph{border-color:var(--accent)}
-.cm .ph img{width:100%;height:100%;object-fit:cover}
-.cm b{display:block;font-weight:600}
-.cm span{color:var(--muted);display:block}
-.person{background:var(--bg);border-radius:12px;padding:12px 14px;margin-top:8px;font-size:14px}
-.person p{margin:6px 0}
-.prov{margin:4px 0;font-size:14px}
-.prov b{display:inline-block;min-width:54px}
-.pchip{display:inline-block;border:1.5px solid var(--line);border-radius:8px;padding:2px 9px;margin:2px 4px 2px 0;font-size:13px;font-weight:500}
-.tiny{font-size:12px;color:var(--muted);margin-top:8px}
-.lbl{font-weight:600;font-size:13px;color:var(--muted);margin:0 0 6px;letter-spacing:.02em}
+        body {
+            background: radial-gradient(circle at top, #1e1b4b 0%, var(--bg-dark) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
 
-.scrim{position:fixed;inset:0;background:rgba(8,6,18,.6);z-index:20;display:none;align-items:center;justify-content:center;padding:16px}
-.scrim.on{display:flex}
-.modal{background:var(--surface);border-radius:20px;max-width:680px;width:100%;max-height:92%;overflow:auto;display:grid;grid-template-columns:200px 1fr;gap:20px;padding:20px}
-.modal h2{font:800 28px/1.05 var(--head);margin:0 0 4px}
-.modal p{margin:10px 0}
-.pick{font-weight:600;color:var(--accent);margin:0 0 6px}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.rate{display:flex;gap:2px;margin-top:6px}
-.rate button{border:0;background:transparent;font-size:30px;line-height:1;color:var(--line);padding:2px 4px;min-width:44px;min-height:44px}
-.rate button.f{color:var(--star)}
-.muted{color:var(--muted)}
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            max-width: 900px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+        }
 
-.panel{max-width:420px}
-.panel label{display:block;font-weight:600;margin:14px 0 6px}
-.panel input{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;min-height:46px}
-.notice{background:var(--surface);border:1.5px dashed var(--line);border-radius:12px;padding:14px 16px;max-width:520px}
+        .player-container {
+            width: 100%;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid #334155;
+        }
 
-.tabbar{display:none}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:12px;font-weight:600;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
-.toast.on{opacity:1}
-.note{color:var(--muted);font-size:13px;margin-top:28px;max-width:640px}
+        video { width: 100%; display: block; max-height: 480px; }
 
-@media (max-width:760px){
-  .shell{display:block}
-  aside{display:none}
-  main{padding:18px 16px calc(92px + env(safe-area-inset-bottom,0px))}
-  .grid{grid-template-columns:repeat(2,1fr);gap:14px}
-  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:10}
-  .tabbar .nb{flex:1;justify-content:center;text-align:center;font-size:13px;padding:8px 2px;gap:4px}
-  .tabbar .nb[aria-current="page"]{box-shadow:none;background:var(--bg)}
-  .scrim{align-items:flex-end;padding:0}
-  .modal{grid-template-columns:1fr;border-radius:20px 20px 0 0;max-height:92%;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
-  .modal .poster{max-width:150px}
-}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+        .movie-title-text { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+        .synopsis-text { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-top: 10px; }
+
+        .cast-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .cast-tag { background: #1e293b; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; color: #cbd5e1; border: 1px solid #334155; }
+
+        .btn-download-main {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: #fff;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="shell">
-  <aside id="side" aria-label="Main"></aside>
-  <main id="main"></main>
-</div>
-<nav class="tabbar" id="tabs" aria-label="Main"></nav>
-<div class="scrim" id="scrim"><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt"></div></div>
-<div class="toast" id="toast" role="status"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="config.js"></script>
-<script>
-(function(){
-  var CFG=window.REEL_CONFIG||{};
-  var sb=null;
-  try{ if(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase){ sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY); } }catch(e){ sb=null; }
+    <div class="main-card">
+        <!-- Direct Video Player -->
+        <div class="player-container">
+            <video id="mainVideoPlayer" controls poster="">
+                <source id="videoSource" src="" type="video/mp4">
+                Browser yako haiwezi kucheza video hii.
+            </video>
+        </div>
 
-  var IMG="https://image.tmdb.org/t/p/w342";
-  var st={tab:"discover",q:"",genre:0,feed:"trending",canInstall:false,genres:[],items:[],page:1,total:1,loading:false,err:"",list:{},user:null,email:"",authMsg:"",authErr:false,busy:false};
-  var REGION=((navigator.language||"en-US").split("-")[1]||"US").toUpperCase();
-  var modalState=null, reqId=0, searchTimer=null;
+        <!-- Taarifa Kutoka TMDB API -->
+        <div>
+            <h1 class="movie-title-text" id="movieTitle">Loading Movie...</h1>
+            <p class="synopsis-text" id="movieOverview">Tafadhali subiri maelezo yanapakiwa...</p>
 
-  try{var s=localStorage.getItem("reel-list");if(s)st.list=JSON.parse(s)||{};}catch(e){}
-  function saveLocal(){try{localStorage.setItem("reel-list",JSON.stringify(st.list));}catch(e){}}
-  function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-  function toast(t){var e=document.getElementById("toast");e.textContent=t;e.classList.add("on");setTimeout(function(){e.classList.remove("on");},2200);}
+            <div style="margin-top: 15px;">
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: #818cf8; margin-bottom: 6px;">Waigizaji (Top Cast)</h4>
+                <div class="cast-tags" id="castContainer"></div>
+            </div>
+        </div>
 
-  /* ---------- TMDB (through your own /api/tmdb function) ---------- */
-  function api(path,params){
-    var qs=new URLSearchParams(params||{});qs.set("path",path);
-    return fetch("/api/tmdb?"+qs.toString()).then(function(r){
-      if(!r.ok)throw new Error("Movie database request failed ("+r.status+"). Check that TMDB_TOKEN is set on your host.");
-      return r.json();
-    });
-  }
-  function norm(m){return {id:m.id,title:m.title||"Untitled",poster:m.poster_path||"",year:m.release_date?+m.release_date.slice(0,4):0};}
+        <!-- Direct Download Button -->
+        <a id="downloadBtn" href="#" download class="btn-download-main">
+            <i class="fa-solid fa-download"></i> Download Direct MP4
+        </a>
+    </div>
 
-  var FEEDS={trending:["Trending","/trending/movie/week"],popular:["Popular","/movie/popular"],top:["Top rated","/movie/top_rated"],now:["In cinemas","/movie/now_playing"],upcoming:["Coming soon","/movie/upcoming"]};
-  function ymd(d){return d.toISOString().slice(0,10);}
-  var standalone=!!(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
-  function loadItems(reset){
-    if(reset){st.page=1;st.items=[];}
-    st.loading=true;st.err="";render();
-    var p,params={page:st.page,include_adult:"false"};
-    if(st.q.trim()){p="/search/movie";params.query=st.q.trim();}
-    else if(st.genre){
-      p="/discover/movie";params.with_genres=st.genre;params.sort_by="popularity.desc";
-      if(st.feed==="top"){params.sort_by="vote_average.desc";params["vote_count.gte"]=500;}
-      else if(st.feed==="now"){var t=new Date(),f=new Date(t.getTime()-45*864e5);params["primary_release_date.gte"]=ymd(f);params["primary_release_date.lte"]=ymd(t);}
-      else if(st.feed==="upcoming"){params["primary_release_date.gte"]=ymd(new Date());}
-    }
-    else p=FEEDS[st.feed][1];
-    var token=++reqId;
-    api(p,params).then(function(d){
-      if(token!==reqId)return;
-      st.items=st.items.concat((d.results||[]).map(norm));
-      st.total=d.total_pages||1;st.loading=false;render();
-    }).catch(function(e){if(token!==reqId)return;st.err=e.message;st.loading=false;render();});
-  }
+    <script>
+        const TMDB_API_KEY = "15d1606f54f160e7b3222d57d42100a5"; // TMDB Demo Key
+        const movieId = "260513"; // ID ya Venom (2018) kwenye TMDB
 
-  /* ---------- list + sync ---------- */
-  function setStatus(m,status){
-    var cur=st.list[m.id];
-    if(!status){delete st.list[m.id];}
-    else{st.list[m.id]={id:m.id,title:m.title,poster:m.poster,year:m.year,status:status,rating:(cur&&status==="watched")?cur.rating:0};}
-    saveLocal();remoteSave(m.id);
-  }
-  function setRating(id,r){if(st.list[id]){st.list[id].rating=r;saveLocal();remoteSave(id);}}
-  function remoteSave(id){
-    if(!sb||!st.user)return;
-    var it=st.list[id],q;
-    if(it){q=sb.from("movie_list").upsert({user_id:st.user.id,movie_id:it.id,title:it.title,poster_path:it.poster,year:it.year,status:it.status,rating:it.rating,updated_at:new Date().toISOString()},{onConflict:"user_id,movie_id"});}
-    else{q=sb.from("movie_list").delete().eq("movie_id",id);}
-    q.then(function(r){if(r&&r.error)toast("Sync failed: "+r.error.message);});
-  }
-  function syncAfterSignIn(){
-    sb.from("movie_list").select("*").then(function(r){
-      if(r.error){toast("Could not load your list: "+r.error.message);return;}
-      var remote={},local=st.list,push=[];
-      (r.data||[]).forEach(function(x){remote[x.movie_id]={id:x.movie_id,title:x.title,poster:x.poster_path||"",year:x.year||0,status:x.status,rating:x.rating||0};});
-      Object.keys(local).forEach(function(k){if(!remote[k]){remote[k]=local[k];push.push(+k);}});
-      st.list=remote;saveLocal();render();
-      push.forEach(remoteSave);
-    });
-  }
-  if(sb){
-    sb.auth.onAuthStateChange(function(ev,session){
-      var u=session?session.user:null,was=st.user;
-      st.user=u;
-      setTimeout(function(){
-        if(u&&(!was||was.id!==u.id))syncAfterSignIn();
-        render();
-      },0);
-    });
-  }
+        // Function ya API Call
+        function api(path, params) {
+            const query = new URLSearchParams({ api_key: TMDB_API_KEY, ...params });
+            return fetch(`https://api.themoviedb.org/3${path}?${query}`).then(res => res.json());
+        }
 
-  /* ---------- views ---------- */
-  function poster(m,badge){
-    var h=(m.id*47+210)%360;
-    if(m.poster)return '<div class="poster">'+(badge?'<span class="badge">'+badge+'</span>':'')+'<img src="'+IMG+esc(m.poster)+'" alt="" loading="lazy"></div>';
-    return '<div class="poster" style="background:linear-gradient(160deg,hsl('+h+',55%,34%),hsl('+((h+50)%360)+',60%,18%))">'+(badge?'<span class="badge">'+badge+'</span>':'')+'<span class="tt">'+esc(m.title)+'</span></div>';
-  }
-  function stars(r){var s="";for(var i=1;i<=5;i++)s+=i<=r?"★":"☆";return s;}
-  function card(m){
-    var l=st.list[m.id],badge=l?(l.status==="watched"?"Watched":"On list"):"";
-    return '<button class="card" data-act="open" data-id="'+m.id+'" aria-label="'+esc(m.title)+(m.year?', '+m.year:'')+'">'+poster(m,badge)+
-      '<div class="meta"><b>'+esc(m.title)+'</b><span>'+(m.year||"")+'</span>'+(l&&l.rating?'<div class="stars" aria-label="'+l.rating+' of 5 stars">'+stars(l.rating)+'</div>':'')+'</div></button>';
-  }
-  function head(title,sub){
-    return '<div class="top"><div><h1>'+title+'</h1><p class="sub">'+sub+'</p></div><div class="acts">'+(st.canInstall?'<button class="btn" data-act="install">Install Reel</button>':'')+'<button class="btn primary" data-act="pick">Pick a movie for me</button></div></div>';
-  }
-  function viewDiscover(){
-    var h=head("Find a movie","Search or browse what people are watching this week.");
-    h+='<div class="tools"><input type="search" id="q" placeholder="Search movies" value="'+esc(st.q)+'" aria-label="Search movies"></div>';
-    if(!st.q.trim()){
-      h+='<p class="lbl">Browse</p><div class="chips" role="group" aria-label="Movie lists">'+Object.keys(FEEDS).map(function(k){return '<button class="chip" data-act="feed" data-v="'+k+'" aria-pressed="'+(st.feed===k)+'">'+FEEDS[k][0]+'</button>';}).join("")+'</div>';
-      h+='<p class="lbl">Genre</p><div class="chips" role="group" aria-label="Genre"><button class="chip" data-act="genre" data-v="0" aria-pressed="'+(st.genre===0)+'">All genres</button>'+
-        st.genres.map(function(g){return '<button class="chip" data-act="genre" data-v="'+g.id+'" aria-pressed="'+(st.genre===g.id)+'">'+esc(g.name)+'</button>';}).join("")+'</div>';
-    }
-    if(st.err)h+='<div class="err" role="alert">'+esc(st.err)+'</div>';
-    if(st.items.length){
-      h+='<div class="grid">'+st.items.map(card).join("")+'</div>';
-      if(st.page<st.total)h+='<div class="more"><button class="btn" data-act="more"'+(st.loading?' disabled':'')+'>'+(st.loading?'Loading':'Show more')+'</button></div>';
-    }else if(st.loading){h+='<div class="empty">Loading movies</div>';}
-    else if(!st.err){h+='<div class="empty"><b>No movies found</b>Try a different title.</div>';}
-    return h;
-  }
-  function viewList(kind){
-    var arr=Object.keys(st.list).map(function(k){return st.list[k];}).filter(function(x){return x.status===kind;});
-    arr.sort(function(a,b){return a.title.localeCompare(b.title);});
-    var h=kind==="watchlist"?head("Your watchlist","Movies you plan to watch."):head("Watched","Movies you have seen, with your ratings.");
-    if(!arr.length){
-      return h+(kind==="watchlist"?'<div class="empty"><b>Your watchlist is empty</b>Open Discover and add a movie.</div>':'<div class="empty"><b>Nothing watched yet</b>Mark a movie as watched to rate it.</div>');
-    }
-    return h+'<div class="grid">'+arr.map(card).join("")+'</div>';
-  }
-  function viewAccount(){
-    var h='<h1>Account</h1><p class="sub">Sign in to keep one list on your phone and your computer.</p>';
-    if(!sb)return h+'<div class="notice"><b>Accounts are not set up yet.</b><p>Add your Supabase URL and key to config.js (step 2 in the README), then redeploy.</p></div>';
-    if(st.user){
-      return h+'<div class="panel"><p>Signed in as <b>'+esc(st.user.email)+'</b>.</p><p class="muted">Your watchlist, watched movies and ratings sync on every device where you sign in.</p><div class="row"><button class="btn" data-act="signout">Sign out</button></div></div>';
-    }
-    return h+'<div class="panel"><label for="acc-email">Email</label><input type="email" id="acc-email" autocomplete="email" value="'+esc(st.email)+'">'+
-      '<label for="acc-pass">Password (at least 6 characters)</label><input type="password" id="acc-pass" autocomplete="current-password">'+
-      (st.authMsg?'<p class="'+(st.authErr?'err':'notice')+'" role="status" style="margin-top:14px">'+esc(st.authMsg)+'</p>':'')+
-      '<div class="row"><button class="btn primary" data-act="signin"'+(st.busy?' disabled':'')+'>Sign in</button><button class="btn" data-act="signup"'+(st.busy?' disabled':'')+'>Create account</button></div>'+
-      '<p class="muted" style="font-size:14px">Your current list on this device is added to your account when you sign in.</p></div>';
-  }
-  function nav(){
-    var w=0,s=0;Object.keys(st.list).forEach(function(k){if(st.list[k].status==="watchlist")w++;else s++;});
-    var items=[["discover","Discover",""],["watchlist","Watchlist",w||""],["watched","Watched",s||""],["account",st.user?"Account":"Sign in",""]];
-    var h=items.map(function(i){return '<button class="nb" data-act="tab" data-v="'+i[0]+'"'+(st.tab===i[0]?' aria-current="page"':'')+'>'+i[1]+(i[2]!==""?'<span class="cnt">'+i[2]+'</span>':'')+'</button>';}).join("");
-    document.getElementById("side").innerHTML='<p class="logo">Reel</p>'+h;
-    document.getElementById("tabs").innerHTML=h;
-  }
-  function render(){
-    nav();
-    var keep=document.activeElement&&document.activeElement.id;
-    var h=st.tab==="account"?viewAccount():st.tab==="discover"?viewDiscover():viewList(st.tab);
-    if(st.tab==="account"&&!standalone){
-      h+='<div class="notice" style="margin-top:24px"><b>Install Reel</b><p class="muted" style="margin:6px 0 10px">Add Reel to your phone or computer like a normal app, with its own icon and no link to type.</p>'+(st.canInstall?'<button class="btn primary" data-act="install">Install Reel</button>':'<p class="muted" style="margin:0">In Chrome, open the menu (three dots) and choose Install app or Add to Home screen.</p>')+'</div>';
-    }
-    h+='<p class="note">This product uses the TMDB API but is not endorsed or certified by TMDB. Movie data and images are provided by TMDB.</p>';
-    document.getElementById("main").innerHTML=h;
-    if(keep==="q"||keep==="acc-email"){var el=document.getElementById(keep);if(el){el.focus();try{var n=el.value.length;el.setSelectionRange(n,n);}catch(e){}}}
-  }
+        // HUU HAPA MSTARI WAKO WA API:
+        api("/movie/" + movieId, { append_to_response: "videos,credits,watch/providers" }).then(function(d) {
+            // Weka Taarifa za TMDB kwenye UI
+            document.getElementById("movieTitle").innerText = d.title || "Venom (2018)";
+            document.getElementById("movieOverview").innerText = d.overview;
 
-  /* ---------- movie modal, trailer, pick ---------- */
-  function openMovie(m,pickFrom){
-    modalState={m:m,pick:pickFrom||"",d:null,trailer:undefined};
-    drawModal();
-    document.getElementById("scrim").classList.add("on");
-    var id=m.id;
-    api("/movie/"+id,{append_to_response:"videos,credits,watch/providers"}).then(function(d){
-      if(!modalState||modalState.m.id!==id)return;
-      var vids=((d.videos&&d.videos.results)||[]).filter(function(v){return v.site==="YouTube";});
-      var best=vids.filter(function(v){return v.type==="Trailer"&&v.official;})[0]||vids.filter(function(v){return v.type==="Trailer";})[0]||vids.filter(function(v){return v.type==="Teaser";})[0];
-      modalState.d=d;modalState.trailer=best?best.key:null;drawModal();
-    }).catch(function(){if(modalState&&modalState.m.id===id){modalState.trailer=null;modalState.failed=true;drawModal();}});
-  }
-  function castHtml(d){
-    var c=(d&&d.credits&&d.credits.cast)||[];
-    if(!c.length)return "";
-    c=c.slice(0,12);
-    var sel=modalState.person?modalState.person.id:0;
-    var h2='<p class="sec">Cast</p><div class="cast">'+c.map(function(p){
-      var ph=p.profile_path?'<img src="https://image.tmdb.org/t/p/w185'+esc(p.profile_path)+'" alt="" loading="lazy">':esc((p.name||"?").charAt(0));
-      return '<button class="cm" data-act="person" data-id="'+p.id+'" aria-pressed="'+(sel===p.id)+'" aria-label="'+esc(p.name)+' as '+esc(p.character||"")+'"><div class="ph">'+ph+'</div><b>'+esc(p.name)+'</b><span>'+esc(p.character||"")+'</span></button>';
-    }).join("")+'</div>';
-    var pr=modalState.person;
-    if(pr){
-      if(pr.loading)h2+='<div class="person muted">Loading</div>';
-      else if(pr.err)h2+='<div class="person muted">Could not load details.</div>';
-      else{
-        var bio=(pr.biography||"").trim();if(bio.length>650)bio=bio.slice(0,650).replace(/\s+\S*$/,"")+"...";
-        var meta=[];if(pr.birthday)meta.push("Born "+pr.birthday);if(pr.place_of_birth)meta.push(pr.place_of_birth);
-        h2+='<div class="person"><b>'+esc(pr.name)+'</b><div class="muted">'+esc(meta.join(" · "))+'</div><p>'+(bio?esc(bio):'No biography available.')+'</p><a href="https://www.themoviedb.org/person/'+pr.id+'" target="_blank" rel="noopener noreferrer">More on TMDB</a></div>';
-      }
-    }
-    return h2;
-  }
-  function provHtml(d){
-    var res=d&&d["watch/providers"]&&d["watch/providers"].results;
-    if(!res)return "";
-    var reg=res[REGION]?REGION:(res.US?"US":Object.keys(res)[0]);
-    if(!reg)return '<p class="sec">Where to watch</p><p class="muted" style="margin:0">No legal streaming options listed yet.</p><p class="tiny">Streaming data provided by JustWatch.</p>';
-    var r=res[reg],rows=[["flatrate","Stream"],["free","Free"],["ads","Free with ads"],["rent","Rent"],["buy","Buy"]],out="";
-    rows.forEach(function(k){var l=r[k[0]];if(l&&l.length)out+='<div class="prov"><b>'+k[1]+'</b> '+l.map(function(x){return '<span class="pchip">'+esc(x.provider_name)+'</span>';}).join("")+'</div>';});
-    if(!out)out='<p class="muted" style="margin:0">Not available to stream, rent or buy in '+esc(reg)+'.</p>';
-    return '<p class="sec">Where to watch'+(reg!==REGION?' (in '+esc(reg)+')':'')+'</p>'+out+(r.link?'<p class="tiny"><a href="'+esc(r.link)+'" target="_blank" rel="noopener noreferrer">See all options</a> · Streaming data provided by JustWatch.</p>':'<p class="tiny">Streaming data provided by JustWatch.</p>');
-  }
-  function drawModal(){
-    var ms=modalState,m=ms.m,d=ms.d,l=st.list[m.id]||null;
-    var rate="";for(var i=1;i<=5;i++)rate+='<button data-act="rate" data-v="'+i+'" class="'+((l&&i<=l.rating)?'f':'')+'" aria-label="Rate '+i+' star'+(i>1?'s':'')+'">★</button>';
-    var info=[];
-    if(m.year)info.push(m.year);
-    if(d&&d.runtime)info.push(d.runtime+" min");
-    if(d&&d.genres&&d.genres.length)info.push(d.genres.map(function(g){return g.name;}).join(", "));
-    var trailer;
-    if(ms.trailer===undefined)trailer='<span class="btn" aria-busy="true" style="opacity:.6">Finding trailer</span>';
-    else if(ms.trailer)trailer='<a class="btn" href="https://www.youtube.com/watch?v='+encodeURIComponent(ms.trailer)+'" target="_blank" rel="noopener noreferrer">Watch trailer on YouTube</a>';
-    else trailer='<span class="muted" style="align-self:center">No trailer listed</span>';
-    document.getElementById("modal").innerHTML=poster(m)+'<div>'+
-      (ms.pick?'<p class="pick">Tonight\'s pick'+(ms.pick==="watchlist"?' from your watchlist':'')+'</p>':'')+
-      '<h2 id="mt">'+esc(m.title)+'</h2><span class="muted">'+esc(info.join(" · "))+'</span>'+
-      '<p>'+(d?esc(d.overview||"No description available."):'<span class="muted">Loading details</span>')+'</p>'+
-      (d&&d.vote_average?'<p class="muted">TMDB rating: <b>'+d.vote_average.toFixed(1)+' / 10</b>'+(d.vote_count?' ('+d.vote_count.toLocaleString()+' votes)':'')+'</p>':'')+
-      castHtml(d)+provHtml(d)+
-      '<div class="row"><button class="btn'+(l&&l.status==="watchlist"?' on':'')+'" data-act="wl">'+(l&&l.status==="watchlist"?'On your watchlist':'Add to watchlist')+'</button>'+
-      '<button class="btn'+(l&&l.status==="watched"?' on':'')+'" data-act="seen">'+(l&&l.status==="watched"?'Watched':'Mark as watched')+'</button></div>'+
-      '<div class="row">'+trailer+'</div>'+
-      (l&&l.status==="watched"?'<div style="margin-top:14px"><b>Your rating</b><div class="rate">'+rate+'</div></div>':'')+
-      '<div class="row">'+(ms.pick?'<button class="btn" data-act="pick">Pick another</button>':'')+'<button class="btn" data-act="close">Close</button></div></div>';
-  }
-  function closeModal(){document.getElementById("scrim").classList.remove("on");modalState=null;render();}
-  function pickForMe(){
-    var from="watchlist";
-    var pool=Object.keys(st.list).map(function(k){return st.list[k];}).filter(function(x){return x.status==="watchlist";});
-    if(!pool.length){from="discover";pool=st.items.filter(function(x){var l=st.list[x.id];return !(l&&l.status==="watched");});}
-    if(!pool.length){toast("Open Discover first so there are movies to pick from");return;}
-    var curId=modalState?modalState.m.id:0;
-    if(pool.length>1)pool=pool.filter(function(x){return x.id!==curId;});
-    openMovie(pool[Math.floor(Math.random()*pool.length)],from);
-  }
+            // Weka Waigizaji
+            if (d.credits && d.credits.cast) {
+                let castHTML = "";
+                d.credits.cast.slice(0, 5).forEach(actor => {
+                    castHTML += `<span class="cast-tag">${actor.name}</span>`;
+                });
+                document.getElementById("castContainer").innerHTML = castHTML;
+            }
 
-  /* ---------- accounts ---------- */
-  function auth(kind){
-    var email=document.getElementById("acc-email").value.trim(),pass=document.getElementById("acc-pass").value;
-    st.email=email;
-    if(!email||pass.length<6){st.authMsg="Enter your email and a password of at least 6 characters.";st.authErr=true;render();return;}
-    st.busy=true;st.authMsg="";render();
-    var p=kind==="signup"?sb.auth.signUp({email:email,password:pass}):sb.auth.signInWithPassword({email:email,password:pass});
-    p.then(function(r){
-      st.busy=false;
-      if(r.error){st.authMsg=r.error.message;st.authErr=true;}
-      else if(kind==="signup"&&!(r.data&&r.data.session)){st.authMsg="Check your email to confirm your account, then sign in.";st.authErr=false;}
-      else{st.authMsg="";}
-      render();
-    });
-  }
+            // Direct Video Link kutoka Supabase Storage yako
+            const directVideoUrl = "https://gkegmztnarvjzakkbyuv.supabase.co/storage/v1/object/public/movies/VENOM%20-%20Official%20Trailer%20(HD).mp4";
 
-  /* ---------- events ---------- */
-  document.addEventListener("click",function(e){
-    var b=e.target.closest("[data-act]");
-    if(!b){if(e.target.id==="scrim")closeModal();return;}
-    var a=b.getAttribute("data-act"),v=b.getAttribute("data-v");
-    if(a==="tab"){st.tab=v;render();window.scrollTo(0,0);if(v==="discover"&&!st.items.length&&!st.loading)loadItems(true);}
-    else if(a==="genre"){st.genre=+v;loadItems(true);}
-    else if(a==="feed"){st.feed=v;loadItems(true);}
-    else if(a==="install")install();
-    else if(a==="person"){
-      var pid=+b.getAttribute("data-id");
-      if(modalState.person&&modalState.person.id===pid){modalState.person=null;drawModal();return;}
-      var mid=modalState.m.id;
-      modalState.person={id:pid,loading:true};drawModal();
-      api("/person/"+pid).then(function(p){
-        if(!modalState||modalState.m.id!==mid||!modalState.person||modalState.person.id!==pid)return;
-        modalState.person={id:pid,name:p.name,biography:p.biography,birthday:p.birthday,place_of_birth:p.place_of_birth};drawModal();
-      }).catch(function(){if(modalState&&modalState.person&&modalState.person.id===pid){modalState.person={id:pid,err:true};drawModal();}});
-    }
-    else if(a==="more"){st.page++;loadItems(false);}
-    else if(a==="open"){
-      var id=+b.getAttribute("data-id");
-      var m=st.items.filter(function(x){return x.id===id;})[0]||st.list[id];
-      if(m)openMovie({id:m.id,title:m.title,poster:m.poster,year:m.year});
-    }
-    else if(a==="close")closeModal();
-    else if(a==="pick")pickForMe();
-    else if(a==="wl"){var l=st.list[modalState.m.id];setStatus(modalState.m,l&&l.status==="watchlist"?null:"watchlist");toast(st.list[modalState.m.id]?"Added to watchlist":"Removed from watchlist");drawModal();}
-    else if(a==="seen"){var l2=st.list[modalState.m.id];setStatus(modalState.m,l2&&l2.status==="watched"?null:"watched");toast(st.list[modalState.m.id]?"Marked as watched":"Removed from watched");drawModal();}
-    else if(a==="rate"){var l3=st.list[modalState.m.id];setRating(modalState.m.id,l3&&l3.rating===+v?0:+v);drawModal();}
-    else if(a==="signin")auth("signin");
-    else if(a==="signup")auth("signup");
-    else if(a==="signout"){sb.auth.signOut().then(function(){st.list={};saveLocal();st.tab="discover";render();toast("Signed out");});}
-  });
-  document.addEventListener("input",function(e){
-    if(e.target.id==="q"){st.q=e.target.value;clearTimeout(searchTimer);searchTimer=setTimeout(function(){loadItems(true);},350);}
-    if(e.target.id==="acc-email")st.email=e.target.value;
-  });
-  document.addEventListener("keydown",function(e){
-    if(e.key==="Escape"&&modalState)closeModal();
-    if(e.key==="Enter"&&(e.target.id==="acc-pass"||e.target.id==="acc-email")){e.preventDefault();auth("signin");}
-  });
+            // Weka Video kwenye Player na Download Button
+            const player = document.getElementById("mainVideoPlayer");
+            document.getElementById("videoSource").src = directVideoUrl;
+            player.load(); // Reload player
 
-  var deferred=null;
-  function install(){
-    if(!deferred){toast("In Chrome, open the menu and choose Install app");return;}
-    deferred.prompt();
-    deferred.userChoice.then(function(){deferred=null;st.canInstall=false;render();});
-  }
-  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;if(!standalone){st.canInstall=true;render();}});
-  window.addEventListener("appinstalled",function(){deferred=null;st.canInstall=false;render();toast("Reel installed");});
-  if("serviceWorker" in navigator){window.addEventListener("load",function(){try{navigator.serviceWorker.register("sw.js");}catch(e){}});}
-
-  render();
-  api("/genre/movie/list").then(function(d){st.genres=d.genres||[];render();}).catch(function(){});
-  loadItems(true);
-})();
-</script>
+            const downloadBtn = document.getElementById("downloadBtn");
+            downloadBtn.href = directVideoUrl;
+            downloadBtn.setAttribute("download", `${d.title || 'Movie'}_HD.mp4`);
+        });
+    </script>
 </body>
 </html>
